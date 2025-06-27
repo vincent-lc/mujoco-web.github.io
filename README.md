@@ -1,1 +1,1 @@
-# vincent-lc.github.io
+# mujoco-web.github.io
