@@ -1,1 +1,1 @@
-# mujoco-web.github.io
+# mujoco-web
