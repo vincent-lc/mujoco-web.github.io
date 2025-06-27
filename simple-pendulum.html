@@ -6,7 +6,7 @@
 -->
 <html>
 	<head>
-		<title>MuJoCo Demo</title>
+		<title>Simple Pendulum - MuJoCo Web Demos</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 		<link rel="stylesheet" href="assets/css/main.css" />
@@ -25,8 +25,8 @@
 				<!-- Nav -->
 					<nav id="nav">
 						<ul class="links">
-							<li class="active"><a href="index.html">Index</a></li>
-							<li><a href="simple-pendulum.html">Simple Pendulum</a></li>
+							<li><a href="index.html">Index</a></li>
+							<li class="active"><a href="simple-pendulum.html">Simple Pendulum</a></li>
 							<li><a href="double-pendulum.html">Double Pendulum</a></li>
 							<li><a href="spring-system.html">Spring System</a></li>
 							<li><a href="rolling-ball.html">Rolling Ball</a></li>
@@ -40,46 +40,15 @@
 							<section class="post">
 								<header class="major">
 									<span class="date">June 2025</span>
-									<h1>MuJoCo<br />
-									Physics Simulation Demo</h1>
-									<p>Interactive demonstrations of MuJoCo physics engine<br />
-									showcasing robotics simulations and dynamic environments<br />
-									for research and development applications.</p>
+									<h1>Simple Pendulum<br />
+									Simulation</h1>
+									<p>Interactive pendulum physics simulation with real-time controls</p>
 								</header>
-								<div class="image main"><img src="images/pic01.jpg" alt="MuJoCo Simulation" /></div>
-								<p>MuJoCo (Multi-Joint dynamics with Contact) is a physics engine designed for fast, accurate simulation of complex robotic systems. This demo showcases various aspects of MuJoCo's capabilities including rigid body dynamics, contact modeling, and constraint handling.</p>
-								<p>The physics engine is particularly well-suited for robotics research, biomechanics, and control system development. It provides high-performance simulation with support for complex geometries, various joint types, and realistic contact interactions.</p>
-								
-								<h2>Key Features</h2>
-								<ul>
-									<li>Fast and accurate rigid body dynamics</li>
-									<li>Advanced contact modeling</li>
-									<li>Support for complex geometries</li>
-									<li>Real-time simulation capabilities</li>
-									<li>Cross-platform compatibility</li>
-								</ul>
-								
-								<h2>Demo Scenarios</h2>
-								<p>Explore various simulation scenarios including:</p>
-								<ul>
-									<li>Robot arm manipulation tasks</li>
-									<li>Humanoid locomotion</li>
-									<li>Multi-body collision dynamics</li>
-									<li>Constraint-based motion planning</li>
-								</ul>
-								
-								<h2>Live MuJoCo Pendulum Demo</h2>
-								<p>Below is an interactive pendulum simulation that demonstrates physics principles similar to MuJoCo. You can interact with the simulation by clicking and dragging the pendulum bob.</p>
 								
 								<div style="width: 100%; height: 500px; border: 2px solid #ddd; border-radius: 8px; overflow: hidden; margin: 20px 0; background: #f8f9fa; position: relative;">
 									<canvas id="pendulumCanvas" width="800" height="500" style="display: block; margin: 0 auto;">
 										Your browser doesn't support HTML5 Canvas.
 									</canvas>
-									<div style="position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.7); color: white; padding: 10px; border-radius: 5px; font-size: 12px;">
-										<strong>Controls:</strong><br>
-										• Click and drag to move pendulum<br>
-										• Watch the realistic physics simulation
-									</div>
 								</div>
 								
 								<!-- Control Panel -->
@@ -166,17 +135,6 @@
 										</div>
 									</div>
 								</div>
-								
-								<p><strong>Physics Features Demonstrated:</strong></p>
-								<ul>
-									<li><strong>Gravity:</strong> Realistic gravitational acceleration</li>
-									<li><strong>Damping:</strong> Air resistance and friction effects</li>
-									<li><strong>Energy Conservation:</strong> Kinetic and potential energy conversion</li>
-									<li><strong>Real-time Simulation:</strong> 60 FPS physics calculations</li>
-									<li><strong>Interactive Control:</strong> Click and drag to set initial conditions</li>
-								</ul>
-								
-								<p>This simulation uses the same mathematical principles that MuJoCo employs for rigid body dynamics, including Euler integration, constraint handling, and realistic physics modeling.</p>
 
 							</section>
 
@@ -246,7 +204,7 @@
 				let currentDragVelocity = 0; // Store the current drag velocity
 				
 				// Velocity scaling factor to make drag velocity more realistic
-				const VELOCITY_SCALE = 0.1; // Scale down the calculated velocity
+				const VELOCITY_SCALE = 0.008; // Scale down the calculated velocity
 				
 				// Clamp function to limit values between min and max
 				function clamp(value, min, max) {

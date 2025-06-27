@@ -1,0 +1,802 @@
+<!DOCTYPE HTML>
+<!--
+	Massively by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Double Pendulum - MuJoCo Web Demos</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<a href="index.html" class="logo">Mujoco Web Demos</a>
+					</header>
+
+				<!-- Nav -->
+					<nav id="nav">
+						<ul class="links">
+							<li><a href="index.html">Index</a></li>
+							<li><a href="simple-pendulum.html">Simple Pendulum</a></li>
+							<li class="active"><a href="double-pendulum.html">Double Pendulum</a></li>
+							<li><a href="spring-system.html">Spring System</a></li>
+							<li><a href="rolling-ball.html">Rolling Ball</a></li>
+						</ul>
+					</nav>
+
+				<!-- Main -->
+					<div id="main">
+
+						<!-- Post -->
+							<section class="post">
+								<header class="major">
+									<span class="date">June 2025</span>
+									<h1>Double Pendulum<br />
+									Simulation</h1>
+									<p>Interactive double pendulum physics simulation with chaotic dynamics</p>
+								</header>
+								
+								<div style="width: 100%; height: 500px; border: 2px solid #ddd; border-radius: 8px; overflow: hidden; margin: 20px 0; background: #f8f9fa; position: relative;">
+									<canvas id="pendulumCanvas" width="800" height="500" style="display: block; margin: 0 auto;">
+										Your browser doesn't support HTML5 Canvas.
+									</canvas>
+								</div>
+								
+								<!-- Control Panel -->
+								<div style="background: #f8f9fa; border: 2px solid #ddd; border-radius: 8px; padding: 20px; margin: 20px 0;">
+									<h3 style="margin-top: 0; color: #333;">Physics Control Panel</h3>
+									<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+										
+										<!-- First Pendulum Parameters -->
+										<div>
+											<h4 style="color: #555; margin-bottom: 15px;">First Pendulum</h4>
+											
+											<div style="margin-bottom: 15px;">
+												<label for="length1Slider" style="display: block; margin-bottom: 5px; font-weight: bold; color: #333;">
+													Length 1: <span id="length1Value">100</span> px
+												</label>
+												<input type="range" id="length1Slider" min="0" max="100" value="40" 
+													   style="width: 100%; height: 6px; border-radius: 3px; background: #ddd; outline: none;">
+											</div>
+											
+											<div style="margin-bottom: 15px;">
+												<label for="angle1Slider" style="display: block; margin-bottom: 5px; font-weight: bold; color: #333;">
+													Initial Angle 1: <span id="angle1Value">45</span>°
+												</label>
+												<input type="range" id="angle1Slider" min="0" max="100" value="75" 
+													   style="width: 100%; height: 6px; border-radius: 3px; background: #ddd; outline: none;">
+											</div>
+											
+											<div style="margin-bottom: 15px;">
+												<label for="velocity1Slider" style="display: block; margin-bottom: 5px; font-weight: bold; color: #333;">
+													Initial Velocity 1: <span id="velocity1Value">0</span> rad/s
+												</label>
+												<input type="range" id="velocity1Slider" min="0" max="100" value="50" 
+													   style="width: 100%; height: 6px; border-radius: 3px; background: #ddd; outline: none;">
+											</div>
+
+                                            <div style="margin-bottom: 15px;">
+												<label for="bobSize1Slider" style="display: block; margin-bottom: 5px; font-weight: bold; color: #333;">
+													Bob Size 1: <span id="bobSize1Value">20</span> px
+												</label>
+												<input type="range" id="bobSize1Slider" min="0" max="100" value="30" 
+													   style="width: 100%; height: 6px; border-radius: 3px; background: #ddd; outline: none;">
+											</div>
+										</div>
+										
+										<!-- Second Pendulum Parameters -->
+										<div>
+											<h4 style="color: #555; margin-bottom: 15px;">Second Pendulum</h4>
+											
+											<div style="margin-bottom: 15px;">
+												<label for="length2Slider" style="display: block; margin-bottom: 5px; font-weight: bold; color: #333;">
+													Length 2: <span id="length2Value">100</span> px
+												</label>
+												<input type="range" id="length2Slider" min="0" max="100" value="40" 
+													   style="width: 100%; height: 6px; border-radius: 3px; background: #ddd; outline: none;">
+											</div>
+											
+											<div style="margin-bottom: 15px;">
+												<label for="angle2Slider" style="display: block; margin-bottom: 5px; font-weight: bold; color: #333;">
+													Initial Angle 2: <span id="angle2Value">45</span>°
+												</label>
+												<input type="range" id="angle2Slider" min="0" max="100" value="75" 
+													   style="width: 100%; height: 6px; border-radius: 3px; background: #ddd; outline: none;">
+											</div>
+											
+											<div style="margin-bottom: 15px;">
+												<label for="velocity2Slider" style="display: block; margin-bottom: 5px; font-weight: bold; color: #333;">
+													Initial Velocity 2: <span id="velocity2Value">0</span> rad/s
+												</label>
+												<input type="range" id="velocity2Slider" min="0" max="100" value="50" 
+													   style="width: 100%; height: 6px; border-radius: 3px; background: #ddd; outline: none;">
+											</div>
+
+                                            <div style="margin-bottom: 15px;">
+												<label for="bobSize2Slider" style="display: block; margin-bottom: 5px; font-weight: bold; color: #333;">
+													Bob Size 2: <span id="bobSize2Value">20</span> px
+												</label>
+												<input type="range" id="bobSize2Slider" min="0" max="100" value="30" 
+													   style="width: 100%; height: 6px; border-radius: 3px; background: #ddd; outline: none;">
+											</div>
+										</div>
+										
+										<!-- Environment Parameters -->
+										<div>
+											<h4 style="color: #555; margin-bottom: 15px;">Environment Parameters</h4>
+											
+											<div style="margin-bottom: 15px;">
+												<label for="gravitySlider" style="display: block; margin-bottom: 5px; font-weight: bold; color: #333;">
+													Gravity: <span id="gravityValue">0.5</span> px/s²
+												</label>
+												<input type="range" id="gravitySlider" min="0" max="100" value="25" 
+													   style="width: 100%; height: 6px; border-radius: 3px; background: #ddd; outline: none;">
+											</div>
+											
+											<div style="margin-bottom: 15px;">
+												<label for="dampingSlider" style="display: block; margin-bottom: 5px; font-weight: bold; color: #333;">
+													Damping: <span id="dampingValue">0.995</span>
+												</label>
+												<input type="range" id="dampingSlider" min="0" max="100" value="90" 
+													   style="width: 100%; height: 6px; border-radius: 3px; background: #ddd; outline: none;">
+											</div>
+											
+											<div style="margin-bottom: 15px;">
+												<label for="traceDurationSlider" style="display: block; margin-bottom: 5px; font-weight: bold; color: #333;">
+													Trace Duration: <span id="traceDurationValue">0</span>s
+												</label>
+												<input type="range" id="traceDurationSlider" min="0" max="100" value="0" 
+													   style="width: 100%; height: 6px; border-radius: 3px; background: #ddd; outline: none;">
+											</div>
+										</div>
+										
+										<!-- Control Buttons -->
+										<div>
+											<h4 style="color: #555; margin-bottom: 15px;">Simulation Controls</h4>
+											
+											<button id="resetBtn" style="width: 100%; padding: 10px; margin-bottom: 10px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+												Reset Simulation
+											</button>
+											
+											<button id="pauseBtn" style="width: 100%; padding: 10px; margin-bottom: 10px; background: #e74c3c; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+												Pause/Resume
+											</button>
+											
+											<div style="background: #ecf0f1; padding: 10px; border-radius: 5px; font-size: 12px;">
+												<strong>Current State:</strong><br>
+												Energy: <span id="energyValue">0.00</span> J<br>
+												Chaos Level: <span id="chaosValue">0.00</span><br>
+												Total Length: <span id="totalLengthValue">200</span> px
+											</div>
+										</div>
+									</div>
+								</div>
+
+							</section>
+
+					</div>
+
+				<!-- Copyright -->
+					<div id="copyright">
+						<ul><li>&copy; Untitled</li><li>Design: <a href="https://html5up.net">HTML5 UP</a></li></ul>
+					</div>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrollex.min.js"></script>
+			<script src="assets/js/jquery.scrolly.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+		<!-- Double Pendulum Simulation Script -->
+		<script>
+			// Wait for DOM to be fully loaded
+			document.addEventListener('DOMContentLoaded', function() {
+				// Double Pendulum Physics Simulation
+				const canvas = document.getElementById('pendulumCanvas');
+				const ctx = canvas.getContext('2d');
+				
+				// Parameter ranges for 0-100 scale mapping
+				const PARAM_RANGES = {
+					length1: { min: 50, max: 200 },
+					length2: { min: 50, max: 200 },
+					angle1: { min: -90, max: 90 },
+					angle2: { min: -90, max: 90 },
+					velocity1: { min: -2, max: 2 },
+					velocity2: { min: -2, max: 2 },
+					gravity: { min: 0.1, max: 2.0 },
+					damping: { min: 0.95, max: 1.0 },
+					bobSize1: { min: 10, max: 40 },
+					bobSize2: { min: 10, max: 40 },
+					traceDuration: { min: 0, max: 30 }
+				};
+				
+				// Physics constants
+				let g = 0.5; // gravity
+				let damping = 0.995; // air resistance
+				let length1 = 100; // first pendulum length
+				let length2 = 100; // second pendulum length
+				let bobSize1 = 20; // first bob size
+				let bobSize2 = 20; // second bob size
+				
+				// Initial values for reset
+				let initialAngle1 = Math.PI / 4; // initial angle 1
+				let initialAngle2 = Math.PI / 4; // initial angle 2
+				let initialVelocity1 = 0; // initial velocity 1
+				let initialVelocity2 = 0; // initial velocity 2
+				
+				// Pendulum state (current simulation values)
+				let angle1 = Math.PI / 4; // current angle 1
+				let angle2 = Math.PI / 4; // current angle 2
+				let angularVelocity1 = 0; // current velocity 1
+				let angularVelocity2 = 0; // current velocity 2
+				let isDragging = false;
+				let isPaused = false;
+				let dragStartX, dragStartY;
+				let draggingBob = 0; // 0 = none, 1 = first bob, 2 = second bob
+				
+				// Animation tracking
+				let lastTime = 0;
+				let chaosLevel = 0;
+				
+				// Path tracing variables
+				let simulationTime = 0; // Current simulation time in seconds
+				let pathPoints = []; // Array to store {time, x, y} data for bob 2
+				let traceDuration = 0; // Trace duration in seconds (0 = no trace)
+				
+				// Drag tracking for velocity calculation
+				let dragStartTime = 0;
+				let lastDragX = 0;
+				let lastDragY = 0;
+				let lastDragTime = 0;
+				let currentDragVelocity1 = 0;
+				let currentDragVelocity2 = 0;
+				
+				// Velocity scaling factor
+				const VELOCITY_SCALE = 0.008;
+				
+				// Clamp function
+				function clamp(value, min, max) {
+					return Math.min(Math.max(value, min), max);
+				}
+				
+				// Canvas center
+				const centerX = canvas.width / 2;
+				const centerY = canvas.height / 3; // Move pivot point to 1/3 down from top
+				
+				// Control panel elements
+				const length1Slider = document.getElementById('length1Slider');
+				const length2Slider = document.getElementById('length2Slider');
+				const angle1Slider = document.getElementById('angle1Slider');
+				const angle2Slider = document.getElementById('angle2Slider');
+				const velocity1Slider = document.getElementById('velocity1Slider');
+				const velocity2Slider = document.getElementById('velocity2Slider');
+				const gravitySlider = document.getElementById('gravitySlider');
+				const dampingSlider = document.getElementById('dampingSlider');
+				const bobSize1Slider = document.getElementById('bobSize1Slider');
+				const bobSize2Slider = document.getElementById('bobSize2Slider');
+				const traceDurationSlider = document.getElementById('traceDurationSlider');
+				const resetBtn = document.getElementById('resetBtn');
+				const pauseBtn = document.getElementById('pauseBtn');
+				
+				// Utility functions for parameter conversion
+				function percentToValue(percent, range) {
+					return range.min + (percent / 100) * (range.max - range.min);
+				}
+				
+				function valueToPercent(value, range) {
+					return ((value - range.min) / (range.max - range.min)) * 100;
+				}
+				
+				// Constrain lengths to prevent pendulum from going below canvas
+				function constrainLengths() {
+					const maxBobSize = Math.max(bobSize1, bobSize2);
+					const maxTotalLength = canvas.height - centerY - maxBobSize - 20;
+					const totalLength = length1 + length2;
+					if (totalLength > maxTotalLength) {
+						const scale = maxTotalLength / totalLength;
+						length1 *= scale;
+						length2 *= scale;
+					}
+				}
+				
+				// Calculate bob positions
+				function getBobPositions() {
+					const x1 = centerX + length1 * Math.sin(angle1);
+					const y1 = centerY + length1 * Math.cos(angle1);
+					const x2 = x1 + length2 * Math.sin(angle2);
+					const y2 = y1 + length2 * Math.cos(angle2);
+					return { x1, y1, x2, y2 };
+				}
+				
+				// Update display values
+				function updateDisplayValues() {
+					// Lengths
+					document.getElementById('length1Value').textContent = Math.round(length1);
+					document.getElementById('length2Value').textContent = Math.round(length2);
+					document.getElementById('totalLengthValue').textContent = Math.round(length1 + length2);
+					
+					// Initial Angles
+					const initialAngle1Degrees = initialAngle1 * 180 / Math.PI;
+					const initialAngle2Degrees = initialAngle2 * 180 / Math.PI;
+					document.getElementById('angle1Value').textContent = Math.round(initialAngle1Degrees);
+					document.getElementById('angle2Value').textContent = Math.round(initialAngle2Degrees);
+					
+					// Initial Velocities
+					document.getElementById('velocity1Value').textContent = initialVelocity1.toFixed(1);
+					document.getElementById('velocity2Value').textContent = initialVelocity2.toFixed(1);
+					
+					// Environment
+					document.getElementById('gravityValue').textContent = g.toFixed(1);
+					document.getElementById('dampingValue').textContent = damping.toFixed(3);
+					document.getElementById('bobSize1Value').textContent = bobSize1;
+					document.getElementById('bobSize2Value').textContent = bobSize2;
+					document.getElementById('traceDurationValue').textContent = Math.round(traceDuration);
+				}
+				
+				// Calculate energy
+				function calculateEnergy() {
+					const { x1, y1, x2, y2 } = getBobPositions();
+					const height1 = centerY - y1;
+					const height2 = centerY - y2;
+					const potentialEnergy = g * (height1 + height2);
+					const kineticEnergy1 = 0.5 * length1 * length1 * angularVelocity1 * angularVelocity1;
+					const kineticEnergy2 = 0.5 * length2 * length2 * angularVelocity2 * angularVelocity2;
+					return potentialEnergy + kineticEnergy1 + kineticEnergy2;
+				}
+				
+				// Calculate chaos level (based on angular velocities)
+				function calculateChaosLevel() {
+					const vel1 = Math.abs(angularVelocity1);
+					const vel2 = Math.abs(angularVelocity2);
+					return (vel1 + vel2) / 4; // Normalize to 0-1 range
+				}
+				
+				// Update state display
+				function updateStateDisplay() {
+					const energy = calculateEnergy();
+					chaosLevel = calculateChaosLevel();
+					
+					document.getElementById('energyValue').textContent = energy.toFixed(2);
+					document.getElementById('chaosValue').textContent = chaosLevel.toFixed(2);
+				}
+				
+				// Double pendulum physics equations
+				function updatePhysics(deltaTime) {
+					if (!isDragging && !isPaused) {
+						// Double pendulum equations of motion
+						const m1 = 1, m2 = 1; // masses (assumed equal)
+						const l1 = length1, l2 = length2;
+						
+						// Trigonometric functions
+						const s1 = Math.sin(angle1);
+						const c1 = Math.cos(angle1);
+						const s2 = Math.sin(angle2);
+						const c2 = Math.cos(angle2);
+						const s12 = Math.sin(angle1 - angle2);
+						const c12 = Math.cos(angle1 - angle2);
+						
+						// Angular accelerations
+						const num1 = -g * (2 * m1 + m2) * s1 - m2 * g * s1 * c12 - 2 * s12 * m2 * (angularVelocity2 * angularVelocity2 * l2 + angularVelocity1 * angularVelocity1 * l1 * c12);
+						const den1 = l1 * (2 * m1 + m2 - m2 * c12 * c12);
+						const angularAcceleration1 = num1 / den1;
+						
+						const num2 = 2 * s12 * (angularVelocity1 * angularVelocity1 * l1 * (m1 + m2) + g * (m1 + m2) * c1 + angularVelocity2 * angularVelocity2 * l2 * m2 * c12);
+						const den2 = l2 * (2 * m1 + m2 - m2 * c12 * c12);
+						const angularAcceleration2 = num2 / den2;
+						
+						// Update velocities and angles
+						angularVelocity1 += angularAcceleration1 * deltaTime;
+						angularVelocity2 += angularAcceleration2 * deltaTime;
+						
+						// Apply speed limits (-1 to 1 rad/s)
+						angularVelocity1 = clamp(angularVelocity1, -1, 1);
+						angularVelocity2 = clamp(angularVelocity2, -1, 1);
+						
+						angularVelocity1 *= damping;
+						angularVelocity2 *= damping;
+						angle1 += angularVelocity1 * deltaTime;
+						angle2 += angularVelocity2 * deltaTime;
+					}
+				}
+				
+				// Render function
+				function render() {
+					// Clear canvas
+					ctx.fillStyle = '#f8f9fa';
+					ctx.fillRect(0, 0, canvas.width, canvas.height);
+					
+					// Draw path trace for bob 2 (behind pendulum)
+					drawPathTrace();
+					
+					const { x1, y1, x2, y2 } = getBobPositions();
+					
+					// Draw first pendulum string
+					ctx.strokeStyle = '#333';
+					ctx.lineWidth = 3;
+					ctx.beginPath();
+					ctx.moveTo(centerX, centerY);
+					ctx.lineTo(x1, y1);
+					ctx.stroke();
+					
+					// Draw second pendulum string
+					ctx.beginPath();
+					ctx.moveTo(x1, y1);
+					ctx.lineTo(x2, y2);
+					ctx.stroke();
+					
+					// Draw pivot point
+					ctx.fillStyle = '#666';
+					ctx.beginPath();
+					ctx.arc(centerX, centerY, 8, 0, 2 * Math.PI);
+					ctx.fill();
+					
+					// Draw first pendulum bob
+					ctx.fillStyle = (isDragging && draggingBob === 1) ? '#e74c3c' : (isPaused ? '#95a5a6' : '#3498db');
+					ctx.beginPath();
+					ctx.arc(x1, y1, bobSize1, 0, 2 * Math.PI);
+					ctx.fill();
+					ctx.strokeStyle = '#2980b9';
+					ctx.lineWidth = 2;
+					ctx.stroke();
+					
+					// Draw second pendulum bob
+					ctx.fillStyle = (isDragging && draggingBob === 2) ? '#e74c3c' : (isPaused ? '#95a5a6' : '#e67e22');
+					ctx.beginPath();
+					ctx.arc(x2, y2, bobSize2, 0, 2 * Math.PI);
+					ctx.fill();
+					ctx.strokeStyle = '#d35400';
+					ctx.lineWidth = 2;
+					ctx.stroke();
+					
+					// Draw pause indicator
+					if (isPaused) {
+						ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+						ctx.fillRect(0, 0, canvas.width, canvas.height);
+						ctx.fillStyle = 'white';
+						ctx.font = '48px Arial';
+						ctx.textAlign = 'center';
+						ctx.fillText('PAUSED', canvas.width / 2, canvas.height / 2);
+					}
+				}
+				
+				// Slider event listeners
+				length1Slider.addEventListener('input', function() {
+					const percent = parseInt(this.value);
+					length1 = percentToValue(percent, PARAM_RANGES.length1);
+					constrainLengths();
+					updateDisplayValues();
+				});
+				
+				length2Slider.addEventListener('input', function() {
+					const percent = parseInt(this.value);
+					length2 = percentToValue(percent, PARAM_RANGES.length2);
+					constrainLengths();
+					updateDisplayValues();
+				});
+				
+				angle1Slider.addEventListener('input', function() {
+					const percent = parseInt(this.value);
+					const angleDegrees = percentToValue(percent, PARAM_RANGES.angle1);
+					initialAngle1 = (angleDegrees * Math.PI) / 180;
+					updateDisplayValues();
+				});
+				
+				angle2Slider.addEventListener('input', function() {
+					const percent = parseInt(this.value);
+					const angleDegrees = percentToValue(percent, PARAM_RANGES.angle2);
+					initialAngle2 = (angleDegrees * Math.PI) / 180;
+					updateDisplayValues();
+				});
+				
+				velocity1Slider.addEventListener('input', function() {
+					const percent = parseInt(this.value);
+					initialVelocity1 = percentToValue(percent, PARAM_RANGES.velocity1);
+					updateDisplayValues();
+				});
+				
+				velocity2Slider.addEventListener('input', function() {
+					const percent = parseInt(this.value);
+					initialVelocity2 = percentToValue(percent, PARAM_RANGES.velocity2);
+					updateDisplayValues();
+				});
+				
+				gravitySlider.addEventListener('input', function() {
+					const percent = parseInt(this.value);
+					g = percentToValue(percent, PARAM_RANGES.gravity);
+					updateDisplayValues();
+				});
+				
+				dampingSlider.addEventListener('input', function() {
+					const percent = parseInt(this.value);
+					damping = percentToValue(percent, PARAM_RANGES.damping);
+					updateDisplayValues();
+				});
+				
+				bobSize1Slider.addEventListener('input', function() {
+					const percent = parseInt(this.value);
+					bobSize1 = percentToValue(percent, PARAM_RANGES.bobSize1);
+					constrainLengths();
+					updateDisplayValues();
+				});
+				
+				bobSize2Slider.addEventListener('input', function() {
+					const percent = parseInt(this.value);
+					bobSize2 = percentToValue(percent, PARAM_RANGES.bobSize2);
+					constrainLengths();
+					updateDisplayValues();
+				});
+				
+				traceDurationSlider.addEventListener('input', function() {
+					const percent = parseInt(this.value);
+					traceDuration = percentToValue(percent, PARAM_RANGES.traceDuration);
+					updateDisplayValues();
+				});
+				
+				// Button event listeners
+				resetBtn.addEventListener('click', function() {
+					angle1 = initialAngle1;
+					angle2 = initialAngle2;
+					angularVelocity1 = initialVelocity1;
+					angularVelocity2 = initialVelocity2;
+					isDragging = false;
+					draggingBob = 0;
+					
+					// Clear path trace data and reset time
+					pathPoints.length = 0;
+					simulationTime = 0;
+				});
+				
+				pauseBtn.addEventListener('click', function() {
+					isPaused = !isPaused;
+					this.textContent = isPaused ? 'Resume' : 'Pause';
+					this.style.background = isPaused ? '#27ae60' : '#e74c3c';
+				});
+				
+				// Mouse handling
+				canvas.addEventListener('mousedown', function(e) {
+					const rect = canvas.getBoundingClientRect();
+					const mouseX = e.clientX - rect.left;
+					const mouseY = e.clientY - rect.top;
+					
+					const { x1, y1, x2, y2 } = getBobPositions();
+					
+					// Check if click is near first bob
+					const distance1 = Math.sqrt((mouseX - x1) ** 2 + (mouseY - y1) ** 2);
+					const distance2 = Math.sqrt((mouseX - x2) ** 2 + (mouseY - y2) ** 2);
+					
+					if (distance1 < bobSize1 + 10) {
+						isDragging = true;
+						draggingBob = 1;
+						dragStartX = mouseX;
+						dragStartY = mouseY;
+						dragStartTime = performance.now();
+						lastDragX = mouseX;
+						lastDragY = mouseY;
+						lastDragTime = dragStartTime;
+						angularVelocity1 = 0;
+						
+						// Clear path trace when starting to drag
+						pathPoints.length = 0;
+					} else if (distance2 < bobSize2 + 10) {
+						isDragging = true;
+						draggingBob = 2;
+						dragStartX = mouseX;
+						dragStartY = mouseY;
+						dragStartTime = performance.now();
+						lastDragX = mouseX;
+						lastDragY = mouseY;
+						lastDragTime = dragStartTime;
+						angularVelocity2 = 0;
+						
+						// Clear path trace when starting to drag
+						pathPoints.length = 0;
+					}
+				});
+				
+				canvas.addEventListener('mousemove', function(e) {
+					if (isDragging) {
+						const rect = canvas.getBoundingClientRect();
+						const mouseX = e.clientX - rect.left;
+						const mouseY = e.clientY - rect.top;
+						const currentTime = performance.now();
+						
+						if (draggingBob === 1) {
+							// Dragging first bob
+							const dx = mouseX - centerX;
+							const dy = mouseY - centerY;
+							angle1 = Math.atan2(dx, dy);
+							
+							// Update length1
+							const newLength1 = Math.sqrt(dx * dx + dy * dy);
+							length1 = Math.min(newLength1, 200);
+							constrainLengths();
+							
+							// Update sliders
+							const angle1Degrees = angle1 * 180 / Math.PI;
+							const angle1Percent = valueToPercent(angle1Degrees, PARAM_RANGES.angle1);
+							angle1Slider.value = Math.round(angle1Percent);
+							initialAngle1 = angle1;
+							
+							const length1Percent = valueToPercent(length1, PARAM_RANGES.length1);
+							length1Slider.value = Math.round(length1Percent);
+							
+						} else if (draggingBob === 2) {
+							// Dragging second bob
+							const { x1, y1 } = getBobPositions();
+							const dx = mouseX - x1;
+							const dy = mouseY - y1;
+							angle2 = Math.atan2(dx, dy);
+							
+							// Update length2
+							const newLength2 = Math.sqrt(dx * dx + dy * dy);
+							length2 = Math.min(newLength2, 200);
+							constrainLengths();
+							
+							// Update sliders
+							const angle2Degrees = angle2 * 180 / Math.PI;
+							const angle2Percent = valueToPercent(angle2Degrees, PARAM_RANGES.angle2);
+							angle2Slider.value = Math.round(angle2Percent);
+							initialAngle2 = angle2;
+							
+							const length2Percent = valueToPercent(length2, PARAM_RANGES.length2);
+							length2Slider.value = Math.round(length2Percent);
+						}
+						
+						// Calculate drag velocity
+						const timeDelta = (currentTime - lastDragTime) / 1000;
+						if (timeDelta > 0) {
+							if (draggingBob === 1) {
+								const dx1 = lastDragX - centerX;
+								const dy1 = lastDragY - centerY;
+								const angle1_1 = Math.atan2(dx1, dy1);
+								
+								const dx2 = mouseX - centerX;
+								const dy2 = mouseY - centerY;
+								const angle1_2 = Math.atan2(dx2, dy2);
+								
+								let angularVelocityChange = angle1_2 - angle1_1;
+								if (angularVelocityChange > Math.PI) angularVelocityChange -= 2 * Math.PI;
+								if (angularVelocityChange < -Math.PI) angularVelocityChange += 2 * Math.PI;
+								
+								currentDragVelocity1 = angularVelocityChange / timeDelta;
+							} else if (draggingBob === 2) {
+								const { x1, y1 } = getBobPositions();
+								const dx1 = lastDragX - x1;
+								const dy1 = lastDragY - y1;
+								const angle2_1 = Math.atan2(dx1, dy1);
+								
+								const dx2 = mouseX - x1;
+								const dy2 = mouseY - y1;
+								const angle2_2 = Math.atan2(dx2, dy2);
+								
+								let angularVelocityChange = angle2_2 - angle2_1;
+								if (angularVelocityChange > Math.PI) angularVelocityChange -= 2 * Math.PI;
+								if (angularVelocityChange < -Math.PI) angularVelocityChange += 2 * Math.PI;
+								
+								currentDragVelocity2 = angularVelocityChange / timeDelta;
+							}
+						}
+						
+						lastDragX = mouseX;
+						lastDragY = mouseY;
+						lastDragTime = currentTime;
+						
+						updateDisplayValues();
+					}
+				});
+				
+				canvas.addEventListener('mouseup', function(e) {
+					if (isDragging) {
+						if (draggingBob === 1) {
+							const dragVelocity = currentDragVelocity1 * VELOCITY_SCALE;
+							const clampedVelocity = clamp(dragVelocity, -1, 1);
+							angularVelocity1 = clampedVelocity;
+							initialVelocity1 = clampedVelocity;
+							
+							const velocity1Percent = valueToPercent(clampedVelocity, PARAM_RANGES.velocity1);
+							velocity1Slider.value = Math.round(velocity1Percent);
+						} else if (draggingBob === 2) {
+							const dragVelocity = currentDragVelocity2 * VELOCITY_SCALE;
+							const clampedVelocity = clamp(dragVelocity, -1, 1);
+							angularVelocity2 = clampedVelocity;
+							initialVelocity2 = clampedVelocity;
+							
+							const velocity2Percent = valueToPercent(clampedVelocity, PARAM_RANGES.velocity2);
+							velocity2Slider.value = Math.round(velocity2Percent);
+						}
+						
+						updateDisplayValues();
+					}
+					isDragging = false;
+					draggingBob = 0;
+				});
+				
+				// Animation loop
+				function animate(currentTime) {
+					const deltaTime = (currentTime - lastTime) / 16.67; // Normalize to 60 FPS
+					lastTime = currentTime;
+					
+					// Update simulation time (convert to seconds)
+					simulationTime += deltaTime / 60;
+					
+					updatePhysics(deltaTime);
+					render();
+					
+					// Add path point for bob 2 if tracing is enabled
+					if (!isDragging) {
+						const { x2, y2 } = getBobPositions();
+						addPathPoint(simulationTime, x2, y2);
+					}
+					
+					updateDisplayValues();
+					updateStateDisplay();
+					requestAnimationFrame(animate);
+				}
+				
+				// Initialize display
+				updateDisplayValues();
+				
+				// Start animation
+				animate(0);
+
+				// Add path point for bob 2
+				function addPathPoint(time, x, y) {
+					if (traceDuration <= 0) return;
+					
+					pathPoints.push({ time: time, x: x, y: y });
+					
+					// Remove old path points beyond traceDuration
+					while (pathPoints.length > 0 && pathPoints[0].time < time - traceDuration) {
+						pathPoints.shift();
+					}
+				}
+				
+				// Draw path trace for bob 2
+				function drawPathTrace() {
+					if (traceDuration <= 0 || pathPoints.length < 2) return;
+					
+					ctx.strokeStyle = 'rgba(230, 126, 34, 0.6)'; // Semi-transparent orange
+					ctx.lineWidth = 2;
+					ctx.beginPath();
+					
+					for (let i = 0; i < pathPoints.length; i++) {
+						const point = pathPoints[i];
+						if (i === 0) {
+							ctx.moveTo(point.x, point.y);
+						} else {
+							ctx.lineTo(point.x, point.y);
+						}
+					}
+					ctx.stroke();
+					
+					// Draw path points with fading opacity based on age
+					for (let i = 0; i < pathPoints.length; i++) {
+						const point = pathPoints[i];
+						const age = simulationTime - point.time;
+						const opacity = Math.max(0.1, 1 - (age / traceDuration)); // Fade out over traceDuration
+						
+						ctx.fillStyle = `rgba(230, 126, 34, ${opacity})`;
+						ctx.beginPath();
+						ctx.arc(point.x, point.y, 2, 0, 2 * Math.PI);
+						ctx.fill();
+					}
+				}
+			});
+		</script>
+
+	</body>
+</html>

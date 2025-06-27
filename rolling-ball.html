@@ -1,0 +1,1086 @@
+<!DOCTYPE HTML>
+<!--
+	Massively by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Rolling Ball - MuJoCo Demo</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+		<style>
+			#simulationContainer {
+				width: 100%;
+				height: 600px;
+				border: 2px solid #ddd;
+				border-radius: 8px;
+				overflow: hidden;
+				margin: 20px 0;
+				background: #f8f9fa;
+				position: relative;
+			}
+			
+			#infoPanel {
+				position: absolute;
+				top: 10px;
+				left: 10px;
+				background: rgba(0,0,0,0.8);
+				color: white;
+				padding: 15px;
+				border-radius: 8px;
+				font-size: 12px;
+				z-index: 1000;
+				max-width: 250px;
+			}
+			
+			.control-panel {
+				background: #f8f9fa;
+				border: 2px solid #ddd;
+				border-radius: 8px;
+				padding: 20px;
+				margin: 20px 0;
+			}
+			
+			.control-grid {
+				display: grid;
+				grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+				gap: 20px;
+			}
+			
+			.control-section h4 {
+				color: #555;
+				margin-bottom: 15px;
+			}
+			
+			.control-item {
+				margin-bottom: 15px;
+			}
+			
+			.control-item label {
+				display: block;
+				margin-bottom: 5px;
+				font-weight: bold;
+				color: #333;
+			}
+			
+			.control-item input[type="range"] {
+				width: 100%;
+				height: 6px;
+				border-radius: 3px;
+				background: #ddd;
+				outline: none;
+			}
+			
+			.control-button {
+				width: 100%;
+				padding: 10px;
+				margin-bottom: 10px;
+				border: none;
+				border-radius: 5px;
+				cursor: pointer;
+				font-weight: bold;
+				color: white;
+			}
+			
+			.reset-btn {
+				background: #3498db;
+			}
+			
+			.pause-btn {
+				background: #e74c3c;
+			}
+			
+			.state-info {
+				background: #ecf0f1;
+				padding: 10px;
+				border-radius: 5px;
+				font-size: 12px;
+			}
+		</style>
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<a href="index.html" class="logo">Mujoco Web Demos</a>
+					</header>
+
+				<!-- Nav -->
+					<nav id="nav">
+						<ul class="links">
+							<li><a href="index.html">Index</a></li>
+							<li><a href="simple-pendulum.html">Simple Pendulum</a></li>
+							<li><a href="double-pendulum.html">Double Pendulum</a></li>
+							<li><a href="spring-system.html">Spring System</a></li>
+							<li class="active"><a href="rolling-ball.html">Rolling Ball</a></li>
+						</ul>
+					</nav>
+
+				<!-- Main -->
+					<div id="main">
+
+						<!-- Post -->
+							<section class="post">
+								<header class="major">
+									<span class="date">June 2025</span>
+									<h1>Rolling Ball<br />
+									3D Physics Simulation</h1>
+									<p>Interactive 3D simulation of a ball rolling on an inclined<br />
+									randomly generated surface with realistic physics and controls.</p>
+								</header>
+								
+								<div id="simulationContainer">
+									<div id="infoPanel">
+										<strong>Camera Mode:</strong><br>
+										• Left click + drag: Rotate camera<br>
+										• Right click + drag: Pan camera<br>
+										• Scroll: Zoom in/out<br>
+										• S: Switch to surface mode<br>
+										• B: Switch to ball mode<br>
+										• Watch realistic physics simulation
+									</div>
+								</div>
+								
+								<!-- Control Panel -->
+								<div class="control-panel">
+									<h3 style="margin-top: 0; color: #333;">Physics Control Panel</h3>
+									<div class="control-grid">
+										
+										<!-- Ball Parameters -->
+										<div class="control-section">
+											<h4>Ball Parameters</h4>
+											
+											<div class="control-item">
+												<label for="ballSizeSlider">
+													Ball Size: <span id="ballSizeValue">1.0</span> m
+												</label>
+												<input type="range" id="ballSizeSlider" min="0.1" max="3.0" value="1.0" step="0.1">
+											</div>
+											
+											<div class="control-item">
+												<label for="ballMassSlider">
+													Ball Mass: <span id="ballMassValue">1.0</span> kg
+												</label>
+												<input type="range" id="ballMassSlider" min="0.1" max="5.0" value="1.0" step="0.1">
+											</div>
+										</div>
+										
+										<!-- Surface Parameters -->
+										<div class="control-section">
+											<h4>Surface Parameters</h4>
+											
+											<div class="control-item">
+												<label for="surfaceSizeSlider">
+													Surface Size: <span id="surfaceSizeValue">100</span> m
+												</label>
+												<input type="range" id="surfaceSizeSlider" min="50" max="200" value="100">
+											</div>
+											
+											<div class="control-item">
+												<label for="bumpIntensitySlider">
+													Bump Intensity: <span id="bumpIntensityValue">1.0</span>
+												</label>
+												<input type="range" id="bumpIntensitySlider" min="0" max="3" value="1.0" step="0.1">
+											</div>
+											
+											<div class="control-item">
+												<label for="surfaceTiltXSlider">
+													Surface Tilt X: <span id="surfaceTiltXValue">0</span>°
+												</label>
+												<input type="range" id="surfaceTiltXSlider" min="-45" max="45" value="0" step="1">
+											</div>
+											
+											<div class="control-item">
+												<label for="surfaceTiltZSlider">
+													Surface Tilt Z: <span id="surfaceTiltZValue">0</span>°
+												</label>
+												<input type="range" id="surfaceTiltZSlider" min="-45" max="45" value="0" step="1">
+											</div>
+											
+											<div class="control-item">
+												<label for="frictionSlider">
+													Friction: <span id="frictionValue">0.3</span>
+												</label>
+												<input type="range" id="frictionSlider" min="0" max="1" value="0.3" step="0.05">
+											</div>
+										</div>
+										
+										<!-- Environment Parameters -->
+										<div class="control-section">
+											<h4>Environment Parameters</h4>
+											
+											<div class="control-item">
+												<label for="gravitySlider">
+													Gravity: <span id="gravityValue">9.8</span> m/s²
+												</label>
+												<input type="range" id="gravitySlider" min="1" max="20" value="9.8" step="0.1">
+											</div>
+											
+											<div class="control-item">
+												<label for="restitutionSlider">
+													Bounciness: <span id="restitutionValue">0.5</span>
+												</label>
+												<input type="range" id="restitutionSlider" min="0" max="1" value="0.5" step="0.05">
+											</div>
+										</div>
+										
+										<!-- Control Buttons -->
+										<div class="control-section">
+											<h4>Simulation Controls</h4>
+											
+											<button id="resetBtn" class="control-button reset-btn">
+												Reset Simulation
+											</button>
+											
+											<button id="pauseBtn" class="control-button pause-btn">
+												Pause/Resume
+											</button>
+											
+											<button id="regenerateBtn" class="control-button" style="background: #27ae60;">
+												Regenerate Surface
+											</button>
+											
+											<div class="state-info">
+												<strong>Current State:</strong><br>
+												Position: <span id="positionValue">(0, 0, 0)</span><br>
+												Velocity: <span id="velocityValue">(0, 0, 0)</span><br>
+												Energy: <span id="energyValue">0.00</span> J<br>
+												Speed: <span id="speedValue">0.00</span> m/s
+											</div>
+										</div>
+									</div>
+								</div>
+								
+								<p><strong>Physics Features Demonstrated:</strong></p>
+								<ul>
+									<li><strong>3D Rigid Body Dynamics:</strong> Realistic ball physics with mass and inertia</li>
+									<li><strong>Collision Detection:</strong> Accurate contact modeling with 3D terrain</li>
+									<li><strong>Friction and Rolling:</strong> Realistic surface interaction on 3D terrain</li>
+									<li><strong>Gravity and Motion:</strong> Natural motion under gravitational force on varied terrain</li>
+									<li><strong>Interactive Controls:</strong> Pick, throw, and manipulate the ball</li>
+									<li><strong>3D Terrain:</strong> Ball rolls over hills and valleys in 3D space</li>
+								</ul>
+								
+								<p>This 3D simulation demonstrates advanced physics concepts including rigid body dynamics, collision detection, friction modeling, and energy conservation on a 3D terrain with height variations - all principles that MuJoCo excels at simulating for robotics and physics research applications.</p>
+
+							</section>
+
+					</div>
+
+				<!-- Copyright -->
+					<div id="copyright">
+						<ul><li>&copy; Untitled</li><li>Design: <a href="https://html5up.net">HTML5 UP</a></li></ul>
+					</div>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrollex.min.js"></script>
+			<script src="assets/js/jquery.scrolly.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+		<!-- Rolling Ball Simulation Script -->
+		<script>
+			// Three.js scene setup
+			let scene, camera, renderer, controls;
+			let ball, surface;
+			let raycaster, mouse;
+			let isDragging = false;
+			let dragStart = new THREE.Vector3();
+			let dragEnd = new THREE.Vector3();
+			let dragVelocity = new THREE.Vector3();
+			
+			// Physics variables
+			let ballVelocity = new THREE.Vector3(1, 0, -1); // Initial velocity in all directions
+			let ballPosition = new THREE.Vector3(0, 15, 0);
+			let ballRadius = 1.0;
+			let ballMass = 1.0;
+			let gravity = 9.8;
+			let friction = 0.3;
+			let restitution = 0.5;
+			let bumpIntensity = 1.0;
+			
+			// Surface movement variables
+			let surfaceOffset = new THREE.Vector3(0, 0, 0);
+			let surfaceRotation = new THREE.Euler(0, 0, 0);
+			let surfaceTiltX = 0;
+			let surfaceTiltZ = 0;
+			let isMovingSurface = false;
+			let isRotatingSurface = false;
+			let isBallMode = false;
+			let lastMousePosition = new THREE.Vector2();
+			
+			// Animation
+			let isPaused = false;
+			let isPhysicsActive = true;
+			let clock = new THREE.Clock();
+			
+			// Surface generation
+			let surfaceGeometry, surfaceMaterial;
+			let surfaceVertices = [];
+			let surfaceIndices = [];
+			
+			// Initialize the simulation
+			function init() {
+				// Scene setup
+				scene = new THREE.Scene();
+				scene.background = new THREE.Color(0x87CEEB); // Sky blue
+				
+				// Camera setup
+				camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+				camera.position.set(0, 0, 50); // Above the XY plane, looking down -Z
+				camera.up.set(0, 1, 0); // Y is up
+				camera.lookAt(0, 0, 0);
+				
+				// Renderer setup
+				renderer = new THREE.WebGLRenderer({ antialias: true });
+				renderer.setSize(document.getElementById('simulationContainer').offsetWidth, 
+								document.getElementById('simulationContainer').offsetHeight);
+				renderer.shadowMap.enabled = true;
+				renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+				renderer.shadowMap.autoUpdate = true;
+				document.getElementById('simulationContainer').appendChild(renderer.domElement);
+				
+				// Controls
+				controls = new THREE.OrbitControls(camera, renderer.domElement);
+				controls.enableDamping = true;
+				controls.dampingFactor = 0.05;
+				
+				// Lighting
+				const ambientLight = new THREE.AmbientLight(0x404040, 0.4);
+				scene.add(ambientLight);
+				
+				const directionalLight = new THREE.DirectionalLight(0xffffff, 1.0);
+				directionalLight.position.set(20, 30, 20);
+				directionalLight.castShadow = true;
+				directionalLight.shadow.mapSize.width = 2048;
+				directionalLight.shadow.mapSize.height = 2048;
+				directionalLight.shadow.camera.near = 0.5;
+				directionalLight.shadow.camera.far = 100;
+				directionalLight.shadow.camera.left = -50;
+				directionalLight.shadow.camera.right = 50;
+				directionalLight.shadow.camera.top = 50;
+				directionalLight.shadow.camera.bottom = -50;
+				directionalLight.shadow.bias = -0.0001;
+				scene.add(directionalLight);
+				
+				// Raycaster for ball interaction
+				raycaster = new THREE.Raycaster();
+				mouse = new THREE.Vector2();
+				
+				// Create ball
+				createBall();
+				
+				// Create surface
+				generateSurface();
+				
+				// Add coordinate axes and gravity indicator
+				addAxes();
+				addGravityIndicator();
+				
+				// Add event listeners
+				addEventListeners();
+				
+				// Update info panel with initial instructions
+				updateInfoPanel();
+				
+				// Start animation
+				animate();
+			}
+			
+			// Create the ball
+			function createBall() {
+				const geometry = new THREE.SphereGeometry(ballRadius, 32, 32);
+				const material = new THREE.MeshLambertMaterial({ 
+					color: 0xff6b6b,
+					transparent: true,
+					opacity: 0.8
+				});
+				ball = new THREE.Mesh(geometry, material);
+				ball.position.copy(ballPosition);
+				ball.castShadow = true;
+				ball.receiveShadow = true;
+				scene.add(ball);
+				
+				// Add a shadow plane underneath the ball
+				addBallShadow();
+			}
+			
+			// Add ball shadow
+			function addBallShadow() {
+				// Remove existing shadow
+				scene.children = scene.children.filter(child => !child.isBallShadow);
+				
+				const shadowGeometry = new THREE.CircleGeometry(ballRadius * 1.2, 32);
+				const shadowMaterial = new THREE.MeshBasicMaterial({ 
+					color: 0x000000,
+					transparent: true,
+					opacity: 0.3,
+					side: THREE.DoubleSide
+				});
+				
+				const shadow = new THREE.Mesh(shadowGeometry, shadowMaterial);
+				shadow.rotation.x = -Math.PI / 2; // Lay flat
+				shadow.isBallShadow = true;
+				scene.add(shadow);
+			}
+			
+			// Generate random surface
+			function generateSurface() {
+				// Remove existing surface
+				if (surface) {
+					scene.remove(surface);
+				}
+				
+				// Create a 3D terrain mesh with height variations
+				const planeSize = parseFloat(document.getElementById('surfaceSizeSlider').value) || 100;
+				const segments = 50; // More segments for smoother terrain
+				const halfSize = planeSize / 2;
+				
+				// Create custom geometry for 3D terrain
+				const geometry = new THREE.BufferGeometry();
+				const vertices = [];
+				const indices = [];
+				const uvs = [];
+				
+				// Generate vertices with height variations
+				for (let i = 0; i <= segments; i++) {
+					for (let j = 0; j <= segments; j++) {
+						const x = (i / segments - 0.5) * planeSize;
+						const y = (j / segments - 0.5) * planeSize; // Changed from z to y
+						
+						// Calculate height using terrain generation algorithm
+						let height = 0;
+						
+						// Large-scale terrain features
+						height += Math.sin(x * 0.1) * Math.cos(y * 0.1) * 5.0 * bumpIntensity;
+						height += Math.sin(x * 0.05) * Math.cos(y * 0.05) * 8.0 * bumpIntensity;
+						
+						// Medium-scale features
+						height += Math.sin(x * 0.2) * Math.cos(y * 0.15) * 3.0 * bumpIntensity;
+						height += Math.sin(x * 0.15) * Math.cos(y * 0.2) * 3.0 * bumpIntensity;
+						
+						// Small-scale details
+						height += Math.sin(x * 0.4) * Math.cos(y * 0.3) * 1.5 * bumpIntensity;
+						height += Math.sin(x * 0.3) * Math.cos(y * 0.4) * 1.5 * bumpIntensity;
+						
+						// Add some randomness for natural variation
+						height += (Math.random() - 0.5) * 1.0 * bumpIntensity;
+						
+						// Apply surface tilt - now height is in Z direction
+						height += x * Math.tan(surfaceTiltX) + y * Math.tan(surfaceTiltZ);
+						
+						vertices.push(x, y, height); // Changed from (x, height, z) to (x, y, height)
+						uvs.push(i / segments, j / segments);
+					}
+				}
+				
+				// Generate indices for triangles
+				for (let i = 0; i < segments; i++) {
+					for (let j = 0; j < segments; j++) {
+						const a = i * (segments + 1) + j;
+						const b = a + segments + 1;
+						const c = a + 1;
+						const d = b + 1;
+						
+						// First triangle
+						indices.push(a, b, c);
+						// Second triangle
+						indices.push(b, d, c);
+					}
+				}
+				
+				// Set geometry attributes
+				geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+				geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+				geometry.setIndex(indices);
+				geometry.computeVertexNormals();
+				
+				const material = new THREE.MeshLambertMaterial({ 
+					color: 0x8FBC8F,
+					side: THREE.DoubleSide
+				});
+				
+				surface = new THREE.Mesh(geometry, material);
+				surface.position.copy(surfaceOffset);
+				surface.rotation.set(surfaceTiltX, surfaceRotation.y, surfaceTiltZ);
+				surface.receiveShadow = true;
+				scene.add(surface);
+			}
+			
+			// Add coordinate axes
+			function addAxes() {
+				const axesHelper = new THREE.AxesHelper(5);
+				axesHelper.position.set(0, 0, 0);
+				scene.add(axesHelper);
+				
+				// Add axis labels
+				addAxisLabel('X', 6, 0, 0, 0xff0000);
+				addAxisLabel('Y', 0, 6, 0, 0x00ff00);
+				addAxisLabel('Z', 0, 0, 6, 0x0000ff);
+			}
+			
+			// Add axis label
+			function addAxisLabel(text, x, y, z, color) {
+				const canvas = document.createElement('canvas');
+				const context = canvas.getContext('2d');
+				canvas.width = 64;
+				canvas.height = 64;
+				context.fillStyle = '#' + color.toString(16).padStart(6, '0');
+				context.font = '48px Arial';
+				context.fillText(text, 10, 45);
+				
+				const texture = new THREE.CanvasTexture(canvas);
+				const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
+				const sprite = new THREE.Sprite(spriteMaterial);
+				sprite.position.set(x, y, z);
+				sprite.scale.set(1, 1, 1);
+				scene.add(sprite);
+			}
+			
+			// Add gravity indicator
+			function addGravityIndicator() {
+				// Remove existing gravity indicator
+				scene.children = scene.children.filter(child => !child.isGravityIndicator);
+				
+				const gravityArrowLength = 4;
+				const arrowGeometry = new THREE.ConeGeometry(0.3, 0.8, 8);
+				const arrowMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+				const arrow = new THREE.Mesh(arrowGeometry, arrowMaterial);
+				
+				// Position arrow to show gravity direction
+				arrow.position.set(0, 10, 0);
+				arrow.rotation.z = Math.PI; // Point downward
+				arrow.isGravityIndicator = true;
+				
+				// Add arrow shaft
+				const shaftGeometry = new THREE.CylinderGeometry(0.08, 0.08, gravityArrowLength, 8);
+				const shaftMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+				const shaft = new THREE.Mesh(shaftGeometry, shaftMaterial);
+				shaft.position.set(0, 8, 0);
+				shaft.isGravityIndicator = true;
+				
+				// Add gravity text
+				const canvas = document.createElement('canvas');
+				const context = canvas.getContext('2d');
+				canvas.width = 256;
+				canvas.height = 64;
+				context.fillStyle = '#ff0000';
+				context.font = '48px Arial';
+				context.fillText('g', 10, 45);
+				
+				const texture = new THREE.CanvasTexture(canvas);
+				const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
+				const sprite = new THREE.Sprite(spriteMaterial);
+				sprite.position.set(0, 12, 0);
+				sprite.scale.set(2, 0.5, 1);
+				sprite.isGravityIndicator = true;
+				
+				scene.add(arrow);
+				scene.add(shaft);
+				scene.add(sprite);
+			}
+			
+			// Get height at position
+			function getHeightAt(x, y) {
+				// Calculate height using the same 3D terrain generation algorithm
+				let height = 0;
+				
+				// Large-scale terrain features
+				height += Math.sin(x * 0.1) * Math.cos(y * 0.1) * 5.0 * bumpIntensity;
+				height += Math.sin(x * 0.05) * Math.cos(y * 0.05) * 8.0 * bumpIntensity;
+				
+				// Medium-scale features
+				height += Math.sin(x * 0.2) * Math.cos(y * 0.15) * 3.0 * bumpIntensity;
+				height += Math.sin(x * 0.15) * Math.cos(y * 0.2) * 3.0 * bumpIntensity;
+				
+				// Small-scale details
+				height += Math.sin(x * 0.4) * Math.cos(y * 0.3) * 1.5 * bumpIntensity;
+				height += Math.sin(x * 0.3) * Math.cos(y * 0.4) * 1.5 * bumpIntensity;
+				
+				// Apply surface tilt - now height is in Z direction
+				height += x * Math.tan(surfaceTiltX) + y * Math.tan(surfaceTiltZ);
+				
+				return height;
+			}
+			
+			// Get normal at position
+			function getNormalAt(x, y) {
+				const delta = 0.1;
+				const h1 = getHeightAt(x - delta, y);
+				const h2 = getHeightAt(x + delta, y);
+				const h3 = getHeightAt(x, y - delta);
+				const h4 = getHeightAt(x, y + delta);
+				
+				// Calculate gradients
+				const gradientX = (h2 - h1) / (2 * delta);
+				const gradientY = (h4 - h3) / (2 * delta);
+				
+				// Create normal vector: (-gradientX, 1, -gradientY) normalized
+				// This ensures the normal is orthogonal to the surface
+				const normal = new THREE.Vector3(-gradientX, 1, -gradientY).normalize();
+				
+				// Apply surface tilt to the normal
+				const tiltMatrix = new THREE.Matrix4();
+				tiltMatrix.makeRotationFromEuler(new THREE.Euler(surfaceTiltX, 0, surfaceTiltZ));
+				normal.applyMatrix4(tiltMatrix);
+				normal.normalize();
+				
+				return normal;
+			}
+			
+			// Get gradient in X direction
+			function getGradientX(x, y) {
+				const delta = 0.1;
+				const h1 = getHeightAt(x - delta, y);
+				const h2 = getHeightAt(x + delta, y);
+				return (h2 - h1) / (2 * delta);
+			}
+			
+			// Get gradient in Y direction
+			function getGradientY(x, y) {
+				const delta = 0.1;
+				const h1 = getHeightAt(x, y - delta);
+				const h2 = getHeightAt(x, y + delta);
+				return (h2 - h1) / (2 * delta);
+			}
+			
+			// Physics update
+			function updatePhysics(deltaTime) {
+				if (isPaused || !isPhysicsActive) return;
+				
+				// Apply gravity
+				const gravityForce = new THREE.Vector3(0, 0, -gravity * ballMass);
+				ballVelocity.add(gravityForce.multiplyScalar(deltaTime / ballMass));
+				
+				// Update position
+				ballPosition.add(ballVelocity.clone().multiplyScalar(deltaTime));
+				
+				// Check collision with surface
+				const collisionBallZ = ballPosition.z - surfaceOffset.z;
+				
+				// Apply inverse rotation to get ball position in surface's local coordinates
+				const cosY = Math.cos(-surfaceRotation.y);
+				const sinY = Math.sin(-surfaceRotation.y);
+				const localX = collisionBallZ * cosY;
+				const localY = collisionBallZ * sinY;
+				
+				const surfaceHeight = getHeightAt(localX, localY) + surfaceOffset.z;
+				const collisionBuffer = 0.1; // Small buffer to prevent going through ground
+				
+				// More robust collision detection with multiple checks
+				if (ballPosition.z - ballRadius <= surfaceHeight + collisionBuffer) {
+					// Ensure ball is above surface with buffer
+					ballPosition.z = surfaceHeight + ballRadius + collisionBuffer;
+					
+					// Get surface normal (already includes tilt)
+					const normal = getNormalAt(localX, localY);
+					
+					// Only reflect if ball is moving toward the surface
+					const velocityTowardSurface = ballVelocity.dot(normal);
+					if (velocityTowardSurface < 0) {
+						// Reflect velocity
+						ballVelocity.sub(normal.clone().multiplyScalar(2 * velocityTowardSurface));
+						
+						// Apply friction to tangential velocity
+						const normalComponent = normal.clone().multiplyScalar(ballVelocity.dot(normal));
+						const tangentialVelocity = ballVelocity.clone().sub(normalComponent);
+						
+						if (tangentialVelocity.length() > 0.01) { // Only apply friction if there's significant tangential motion
+							const frictionForce = tangentialVelocity.clone().normalize().multiplyScalar(-friction * gravity * deltaTime);
+							ballVelocity.add(frictionForce);
+						}
+						
+						// Apply restitution
+						ballVelocity.multiplyScalar(restitution);
+					}
+				}
+				
+				// Prevent uphill movement without momentum
+				// Check if ball is trying to move uphill and has insufficient velocity
+				const currentLocalX = (ballPosition.x - surfaceOffset.x) * cosY;
+				const currentLocalY = (ballPosition.z - surfaceOffset.z) * sinY;
+				
+				// Get gradient at current position
+				const gradientX = getGradientX(currentLocalX, currentLocalY);
+				const gradientY = getGradientY(currentLocalX, currentLocalY);
+				
+				// Calculate required kinetic energy to overcome gradient
+				const gradientMagnitude = Math.sqrt(gradientX * gradientX + gradientY * gradientY);
+				const requiredKineticEnergy = ballMass * gravity * gradientMagnitude * 0.1; // Small distance
+				const currentKineticEnergy = 0.5 * ballMass * (ballVelocity.x * ballVelocity.x + ballVelocity.z * ballVelocity.z);
+				
+				// If ball doesn't have enough kinetic energy to go uphill, reduce velocity
+				if (currentKineticEnergy < requiredKineticEnergy) {
+					// Check if moving uphill in X direction
+					if (gradientX * ballVelocity.x > 0) {
+						ballVelocity.x *= 0.8; // Reduce velocity when going uphill
+					}
+					// Check if moving uphill in Z direction
+					if (gradientY * ballVelocity.z > 0) {
+						ballVelocity.z *= 0.8; // Reduce velocity when going uphill
+					}
+				}
+				
+				// Update ball position
+				ball.position.copy(ballPosition);
+				
+				// Update shadow position
+				updateBallShadow();
+			}
+			
+			// Update ball shadow position
+			function updateBallShadow() {
+				const shadow = scene.children.find(child => child.isBallShadow);
+				if (shadow) {
+					// Position shadow at the ball's x,z coordinates but on the terrain surface
+					const shadowX = ballPosition.x - surfaceOffset.x;
+					const shadowZ = ballPosition.z - surfaceOffset.z;
+					
+					// Apply inverse rotation to get shadow position in surface's local coordinates
+					const shadowCosY = Math.cos(-surfaceRotation.y);
+					const shadowSinY = Math.sin(-surfaceRotation.y);
+					const shadowLocalX = shadowX * shadowCosY;
+					const shadowLocalZ = shadowZ * shadowSinY;
+					
+					const shadowHeight = getHeightAt(shadowLocalX, shadowLocalZ) + surfaceOffset.z + 0.1;
+					shadow.position.set(ballPosition.x, shadowHeight, ballPosition.z);
+					
+					// Scale shadow based on ball height (farther = smaller shadow)
+					const heightDiff = ballPosition.z - shadowHeight;
+					const shadowScale = Math.max(0.1, 1.0 - heightDiff * 0.1);
+					shadow.scale.set(shadowScale, shadowScale, shadowScale);
+					
+					// Adjust opacity based on height
+					const opacity = Math.max(0.05, 0.3 - heightDiff * 0.02);
+					shadow.material.opacity = opacity;
+				}
+			}
+			
+			// Animation loop
+			function animate() {
+				requestAnimationFrame(animate);
+				
+				const deltaTime = Math.min(clock.getDelta(), 0.016); // Cap at 60 FPS
+				updatePhysics(deltaTime);
+				
+				controls.update();
+				renderer.render(scene, camera);
+				
+				// Update info display
+				updateInfo();
+			}
+			
+			// Update info display
+			function updateInfo() {
+				document.getElementById('positionValue').textContent = 
+					`(${ballPosition.x.toFixed(2)}, ${ballPosition.y.toFixed(2)}, ${ballPosition.z.toFixed(2)})`;
+				document.getElementById('velocityValue').textContent = 
+					`(${ballVelocity.x.toFixed(2)}, ${ballVelocity.y.toFixed(2)}, ${ballVelocity.z.toFixed(2)})`;
+				
+				const speed = ballVelocity.length();
+				document.getElementById('speedValue').textContent = speed.toFixed(2);
+				
+				const kineticEnergy = 0.5 * ballMass * speed * speed;
+				const potentialEnergy = ballMass * gravity * ballPosition.z;
+				const totalEnergy = kineticEnergy + potentialEnergy;
+				document.getElementById('energyValue').textContent = totalEnergy.toFixed(2);
+			}
+			
+			// Add event listeners
+			function addEventListeners() {
+				const canvas = renderer.domElement;
+				
+				canvas.addEventListener('mousedown', onMouseDown);
+				canvas.addEventListener('mousemove', onMouseMove);
+				canvas.addEventListener('mouseup', onMouseUp);
+				canvas.addEventListener('contextmenu', (e) => e.preventDefault()); // Prevent context menu
+				
+				// Keyboard controls
+				document.addEventListener('keydown', onKeyDown);
+				
+				// Control sliders
+				document.getElementById('ballSizeSlider').addEventListener('input', updateBallSize);
+				document.getElementById('ballMassSlider').addEventListener('input', updateBallMass);
+				document.getElementById('surfaceSizeSlider').addEventListener('input', updateSurfaceSize);
+				document.getElementById('bumpIntensitySlider').addEventListener('input', updateBumpIntensity);
+				document.getElementById('surfaceTiltXSlider').addEventListener('input', updateSurfaceTiltX);
+				document.getElementById('surfaceTiltZSlider').addEventListener('input', updateSurfaceTiltZ);
+				document.getElementById('gravitySlider').addEventListener('input', updateGravity);
+				document.getElementById('frictionSlider').addEventListener('input', updateFriction);
+				document.getElementById('restitutionSlider').addEventListener('input', updateRestitution);
+				
+				// Control buttons
+				document.getElementById('resetBtn').addEventListener('click', resetSimulation);
+				document.getElementById('pauseBtn').addEventListener('click', togglePause);
+				document.getElementById('regenerateBtn').addEventListener('click', regenerateSurface);
+				
+				// Window resize
+				window.addEventListener('resize', onWindowResize);
+			}
+			
+			// Keyboard event handler
+			function onKeyDown(event) {
+				switch(event.key) {
+					case 'c':
+					case 'C':
+						// Switch to camera mode
+						isMovingSurface = false;
+						isBallMode = false;
+						controls.enabled = true;
+						updateInfoPanel();
+						break;
+					case 's':
+					case 'S':
+						// Switch to surface mode
+						isMovingSurface = true;
+						isBallMode = false;
+						controls.enabled = false;
+						updateInfoPanel();
+						break;
+					case 'b':
+					case 'B':
+						// Switch to ball mode
+						isMovingSurface = false;
+						isBallMode = true;
+						controls.enabled = false;
+						updateInfoPanel();
+						break;
+				}
+			}
+			
+			// Update info panel
+			function updateInfoPanel() {
+				const infoPanel = document.getElementById('infoPanel');
+				if (isMovingSurface) {
+					infoPanel.innerHTML = `
+						<strong>Surface Mode:</strong><br>
+						• Left click + drag: Rotate surface<br>
+						• Right click + drag: Pan surface<br>
+						• C: Switch to camera mode<br>
+						• B: Switch to ball mode<br>
+						• Watch realistic physics simulation
+					`;
+				} else if (isBallMode) {
+					infoPanel.innerHTML = `
+						<strong>Ball Mode:</strong><br>
+						• Click and drag ball: Pick and throw<br>
+						• C: Switch to camera mode<br>
+						• S: Switch to surface mode<br>
+						• Watch realistic physics simulation
+					`;
+				} else {
+					infoPanel.innerHTML = `
+						<strong>Camera Mode:</strong><br>
+						• Left click + drag: Rotate camera<br>
+						• Right click + drag: Pan camera<br>
+						• Scroll: Zoom in/out<br>
+						• S: Switch to surface mode<br>
+						• B: Switch to ball mode<br>
+						• Watch realistic physics simulation
+					`;
+				}
+			}
+			
+			// Mouse event handlers
+			function onMouseDown(event) {
+				event.preventDefault();
+				
+				const rect = renderer.domElement.getBoundingClientRect();
+				mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+				mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+				
+				if (isMovingSurface) {
+					// Surface mode - handle rotation and panning
+					if (event.button === 0) { // Left click - rotate surface
+						isRotatingSurface = true;
+						isPhysicsActive = false; // Pause physics during surface manipulation
+					} else if (event.button === 2) { // Right click - pan surface
+						isRotatingSurface = true; // We'll use the same flag for panning
+						isPhysicsActive = false; // Pause physics during surface manipulation
+					}
+					lastMousePosition.copy(mouse);
+				} else if (isBallMode) {
+					// Ball mode - handle ball interaction
+					if (event.button === 0) { // Left click only
+						raycaster.setFromCamera(mouse, camera);
+						const intersects = raycaster.intersectObject(ball);
+						
+						if (intersects.length > 0) {
+							isDragging = true;
+							dragStart.copy(intersects[0].point);
+							isPhysicsActive = false; // Pause physics during ball dragging
+						}
+					}
+				} else {
+					// Camera mode - handle camera controls
+					if (event.button === 0) { // Left click - rotate camera
+						controls.enabled = true;
+					} else if (event.button === 2) { // Right click - pan camera
+						controls.enabled = true;
+					}
+				}
+			}
+			
+			function onMouseMove(event) {
+				const rect = renderer.domElement.getBoundingClientRect();
+				mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+				mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+				
+				if (isRotatingSurface && isMovingSurface) {
+					// Surface rotation/panning based on mouse movement
+					const deltaX = mouse.x - lastMousePosition.x;
+					const deltaY = mouse.y - lastMousePosition.y;
+					
+					if (event.buttons === 1) { // Left click - rotate
+						surfaceRotation.y += deltaX * 2;
+					} else if (event.buttons === 2) { // Right click - pan
+						surfaceOffset.x += deltaX * 10;
+						surfaceOffset.z += deltaY * 10;
+					}
+					
+					updateSurfacePosition();
+					lastMousePosition.copy(mouse);
+				} else if (isDragging && isBallMode) {
+					// Ball dragging (only in ball mode)
+					raycaster.setFromCamera(mouse, camera);
+					const intersects = raycaster.intersectObject(ball);
+					
+					if (intersects.length > 0) {
+						dragEnd.copy(intersects[0].point);
+					}
+				}
+			}
+			
+			function onMouseUp(event) {
+				if (isRotatingSurface) {
+					isRotatingSurface = false;
+					isPhysicsActive = true; // Restart physics after surface interaction
+					// Re-enable physics after surface interaction
+					if (isMovingSurface) {
+						// Physics is always active, just ensure controls are properly set
+						controls.enabled = false; // Keep camera controls disabled in surface mode
+					}
+				} else if (isDragging && isBallMode) {
+					// Calculate throw velocity (only in ball mode)
+					dragVelocity.subVectors(dragEnd, dragStart);
+					ballVelocity.copy(dragVelocity.multiplyScalar(5)); // Scale factor
+					
+					isDragging = false;
+					isPhysicsActive = true; // Restart physics after ball interaction
+				}
+			}
+			
+			// Control update functions
+			function updateBallSize() {
+				const size = parseFloat(document.getElementById('ballSizeSlider').value);
+				document.getElementById('ballSizeValue').textContent = size.toFixed(1);
+				
+				ballRadius = size;
+				ball.geometry.dispose();
+				ball.geometry = new THREE.SphereGeometry(ballRadius, 32, 32);
+				
+				// Update shadow size
+				addBallShadow();
+			}
+			
+			function updateBallMass() {
+				const mass = parseFloat(document.getElementById('ballMassSlider').value);
+				document.getElementById('ballMassValue').textContent = mass.toFixed(1);
+				ballMass = mass;
+			}
+			
+			function updateSurfaceSize() {
+				const size = parseFloat(document.getElementById('surfaceSizeSlider').value);
+				document.getElementById('surfaceSizeValue').textContent = size;
+				generateSurface(); // Regenerate surface with new size
+			}
+			
+			function updateBumpIntensity() {
+				const intensity = parseFloat(document.getElementById('bumpIntensitySlider').value);
+				document.getElementById('bumpIntensityValue').textContent = intensity.toFixed(1);
+				bumpIntensity = intensity;
+				generateSurface(); // Regenerate surface with new bump intensity
+			}
+			
+			function updateGravity() {
+				const g = parseFloat(document.getElementById('gravitySlider').value);
+				document.getElementById('gravityValue').textContent = g.toFixed(1);
+				gravity = g;
+			}
+			
+			function updateFriction() {
+				const f = parseFloat(document.getElementById('frictionSlider').value);
+				document.getElementById('frictionValue').textContent = f.toFixed(2);
+				friction = f;
+			}
+			
+			function updateRestitution() {
+				const r = parseFloat(document.getElementById('restitutionSlider').value);
+				document.getElementById('restitutionValue').textContent = r.toFixed(2);
+				restitution = r;
+			}
+			
+			function resetSimulation() {
+				ballPosition.set(0, 15, 0);
+				ballVelocity.set(1, 0, -1); // Initial velocity in all directions
+				ball.position.copy(ballPosition);
+			}
+			
+			function togglePause() {
+				isPaused = !isPaused;
+				document.getElementById('pauseBtn').textContent = isPaused ? 'Resume' : 'Pause';
+			}
+			
+			function regenerateSurface() {
+				generateSurface();
+				addGravityIndicator(); // Re-add gravity indicator after surface regeneration
+			}
+			
+			function onWindowResize() {
+				const container = document.getElementById('simulationContainer');
+				camera.aspect = container.offsetWidth / container.offsetHeight;
+				camera.updateProjectionMatrix();
+				renderer.setSize(container.offsetWidth, container.offsetHeight);
+			}
+			
+			// Update surface position
+			function updateSurfacePosition() {
+				if (surface) {
+					surface.position.copy(surfaceOffset);
+					surface.rotation.set(surfaceTiltX, surfaceRotation.y, surfaceTiltZ);
+				}
+			}
+			
+			function updateSurfaceTiltX() {
+				const tilt = parseFloat(document.getElementById('surfaceTiltXSlider').value);
+				document.getElementById('surfaceTiltXValue').textContent = tilt;
+				surfaceTiltX = tilt * Math.PI / 180; // Convert to radians
+				updateSurfacePosition();
+			}
+			
+			function updateSurfaceTiltZ() {
+				const tilt = parseFloat(document.getElementById('surfaceTiltZSlider').value);
+				document.getElementById('surfaceTiltZValue').textContent = tilt;
+				surfaceTiltZ = tilt * Math.PI / 180; // Convert to radians
+				updateSurfacePosition();
+			}
+			
+			// Initialize when page loads
+			window.addEventListener('load', init);
+		</script>
+
+	</body>
+</html> 

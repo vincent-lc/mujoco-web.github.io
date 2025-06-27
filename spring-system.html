@@ -1,0 +1,624 @@
+<!DOCTYPE HTML>
+<!--
+	Massively by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Spring System Demo</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<a href="index.html" class="logo">Mujoco Web Demos</a>
+					</header>
+
+				<!-- Nav -->
+					<nav id="nav">
+						<ul class="links">
+							<li><a href="index.html">Index</a></li>
+							<li><a href="simple-pendulum.html">Simple Pendulum</a></li>
+							<li><a href="double-pendulum.html">Double Pendulum</a></li>
+							<li class="active"><a href="spring-system.html">Spring System</a></li>
+							<li><a href="rolling-ball.html">Rolling Ball</a></li>
+						</ul>
+					</nav>
+
+				<!-- Main -->
+					<div id="main">
+
+						<!-- Post -->
+							<section class="post">
+								<header class="major">
+									<span class="date">June 2025</span>
+									<h1>Spring System<br />
+									Simulation</h1>
+									<p>Interactive mass-spring-damper system with oscillatory dynamics</p>
+								</header>
+								
+								<div style="width: 100%; height: 500px; border: 2px solid #ddd; border-radius: 8px; overflow: hidden; margin: 20px 0; background: #f8f9fa; position: relative;">
+									<canvas id="springCanvas" width="800" height="500" style="display: block; margin: 0 auto;">
+										Your browser doesn't support HTML5 Canvas.
+									</canvas>
+								</div>
+								
+								<!-- Control Panel -->
+								<div style="background: #f8f9fa; border: 2px solid #ddd; border-radius: 8px; padding: 20px; margin: 20px 0;">
+									<h3 style="margin-top: 0; color: #333;">Spring System Control Panel</h3>
+									<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+										
+										<!-- Spring Parameters -->
+										<div>
+											<h4 style="color: #555; margin-bottom: 15px;">Spring Parameters</h4>
+											
+											<div style="margin-bottom: 15px;">
+												<label for="springConstantSlider" style="display: block; margin-bottom: 5px; font-weight: bold; color: #333;">
+													Spring Constant: <span id="springConstantValue">0.5</span> N/m
+												</label>
+												<input type="range" id="springConstantSlider" min="0" max="100" value="25" 
+													   style="width: 100%; height: 6px; border-radius: 3px; background: #ddd; outline: none;">
+											</div>
+											
+											<div style="margin-bottom: 15px;">
+												<label for="massSlider" style="display: block; margin-bottom: 5px; font-weight: bold; color: #333;">
+													Mass: <span id="massValue">1.0</span> kg
+												</label>
+												<input type="range" id="massSlider" min="0" max="100" value="50" 
+													   style="width: 100%; height: 6px; border-radius: 3px; background: #ddd; outline: none;">
+											</div>
+											
+											<div style="margin-bottom: 15px;">
+												<label for="dampingSlider" style="display: block; margin-bottom: 5px; font-weight: bold; color: #333;">
+													Damping: <span id="dampingValue">0.1</span> N·s/m
+												</label>
+												<input type="range" id="dampingSlider" min="0" max="100" value="10" 
+													   style="width: 100%; height: 6px; border-radius: 3px; background: #ddd; outline: none;">
+											</div>
+										</div>
+										
+										<!-- Initial Conditions -->
+										<div>
+											<h4 style="color: #555; margin-bottom: 15px;">Initial Conditions</h4>
+											
+											<div style="margin-bottom: 15px;">
+												<label for="initialPositionSlider" style="display: block; margin-bottom: 5px; font-weight: bold; color: #333;">
+													Initial Position: <span id="initialPositionValue">350</span> px
+												</label>
+												<input type="range" id="initialPositionSlider" min="0" max="100" value="50" 
+													   style="width: 100%; height: 6px; border-radius: 3px; background: #ddd; outline: none;">
+											</div>
+											
+											<div style="margin-bottom: 15px;">
+												<label for="initialVelocitySlider" style="display: block; margin-bottom: 5px; font-weight: bold; color: #333;">
+													Initial Velocity: <span id="initialVelocityValue">0</span> px/s
+												</label>
+												<input type="range" id="initialVelocitySlider" min="0" max="100" value="50" 
+													   style="width: 100%; height: 6px; border-radius: 3px; background: #ddd; outline: none;">
+											</div>
+											
+											<div style="margin-bottom: 15px;">
+												<label for="equilibriumPositionSlider" style="display: block; margin-bottom: 5px; font-weight: bold; color: #333;">
+													Equilibrium: <span id="equilibriumPositionValue">400</span> px
+												</label>
+												<input type="range" id="equilibriumPositionSlider" min="0" max="100" value="50" 
+													   style="width: 100%; height: 6px; border-radius: 3px; background: #ddd; outline: none;">
+											</div>
+										</div>
+										
+										<!-- Control Buttons -->
+										<div>
+											<h4 style="color: #555; margin-bottom: 15px;">Simulation Controls</h4>
+											
+											<button id="resetBtn" style="width: 100%; padding: 10px; margin-bottom: 10px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+												Reset Simulation
+											</button>
+											
+											<button id="pauseBtn" style="width: 100%; padding: 10px; margin-bottom: 10px; background: #e74c3c; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+												Pause/Resume
+											</button>
+											
+											<div style="background: #ecf0f1; padding: 10px; border-radius: 5px; font-size: 12px;">
+												<strong>Current State:</strong><br>
+												Position: <span id="positionValue">400.00</span> px<br>
+												Velocity: <span id="velocityValue">0.00</span> px/s<br>
+												Energy: <span id="energyValue">0.00</span> J<br>
+												Frequency: <span id="frequencyValue">0.00</span> Hz
+											</div>
+										</div>
+									</div>
+								</div>
+
+							</section>
+
+					</div>
+
+				<!-- Copyright -->
+					<div id="copyright">
+						<ul><li>&copy; Untitled</li><li>Design: <a href="https://html5up.net">HTML5 UP</a></li></ul>
+					</div>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrollex.min.js"></script>
+			<script src="assets/js/jquery.scrolly.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+		<!-- Spring System Simulation Script -->
+		<script>
+			// Wait for DOM to be fully loaded
+			document.addEventListener('DOMContentLoaded', function() {
+				// Spring System Physics Simulation
+				const canvas = document.getElementById('springCanvas');
+				const ctx = canvas.getContext('2d');
+				
+				// Parameter ranges for 0-100 scale mapping
+				const PARAM_RANGES = {
+					springConstant: { min: 0.1, max: 2.0 },
+					mass: { min: 0.5, max: 5.0 },
+					damping: { min: 0.01, max: 1.0 },
+					initialPosition: { min: 100, max: 700 },
+					initialVelocity: { min: -200, max: 200 },
+					equilibriumPosition: { min: 200, max: 600 }
+				};
+				
+				// Physics constants
+				let k = 0.5; // spring constant
+				let m = 1.0; // mass
+				let c = 0.1; // damping coefficient
+				let equilibriumX = 400; // equilibrium position
+				
+				// Initial values for reset
+				let initialPosition = 350;
+				let initialVelocity = 0;
+				
+				// Spring state (current simulation values)
+				let position = 350;
+				let velocity = 0;
+				let isDragging = false;
+				let isPaused = false;
+				let dragStartX, dragStartY;
+				
+				// Animation tracking
+				let lastTime = 0;
+				
+				// Drag tracking for velocity calculation
+				let dragStartTime = 0;
+				let lastDragX = 0;
+				let lastDragTime = 0;
+				let currentDragVelocity = 0;
+				
+				// Velocity scaling factor
+				const VELOCITY_SCALE = 0.1;
+				
+				// Clamp function
+				function clamp(value, min, max) {
+					return Math.min(Math.max(value, min), max);
+				}
+				
+				// Canvas dimensions
+				const canvasWidth = canvas.width;
+				const canvasHeight = canvas.height;
+				const massSize = 30;
+				const springAnchorX = 50; // Fixed spring anchor point
+				
+				// Plot data
+				const maxTime = 15; // 15 seconds
+				const dataPoints = []; // Array to store {time, position} data
+				let simulationTime = 0; // Current simulation time in seconds
+				
+				// Control panel elements
+				const springConstantSlider = document.getElementById('springConstantSlider');
+				const massSlider = document.getElementById('massSlider');
+				const dampingSlider = document.getElementById('dampingSlider');
+				const initialPositionSlider = document.getElementById('initialPositionSlider');
+				const initialVelocitySlider = document.getElementById('initialVelocitySlider');
+				const equilibriumPositionSlider = document.getElementById('equilibriumPositionSlider');
+				const resetBtn = document.getElementById('resetBtn');
+				const pauseBtn = document.getElementById('pauseBtn');
+				
+				// Utility functions for parameter conversion
+				function percentToValue(percent, range) {
+					return range.min + (percent / 100) * (range.max - range.min);
+				}
+				
+				function valueToPercent(value, range) {
+					return ((value - range.min) / (range.max - range.min)) * 100;
+				}
+				
+				// Update display values
+				function updateDisplayValues() {
+					// Spring parameters
+					document.getElementById('springConstantValue').textContent = k.toFixed(1);
+					document.getElementById('massValue').textContent = m.toFixed(1);
+					document.getElementById('dampingValue').textContent = c.toFixed(2);
+					
+					// Initial conditions
+					document.getElementById('initialPositionValue').textContent = Math.round(initialPosition);
+					document.getElementById('initialVelocityValue').textContent = Math.round(initialVelocity);
+					document.getElementById('equilibriumPositionValue').textContent = Math.round(equilibriumX);
+				}
+				
+				// Calculate energy
+				function calculateEnergy() {
+					const displacement = position - equilibriumX;
+					const potentialEnergy = 0.5 * k * displacement * displacement;
+					const kineticEnergy = 0.5 * m * velocity * velocity;
+					return potentialEnergy + kineticEnergy;
+				}
+				
+				// Calculate natural frequency
+				function calculateFrequency() {
+					return Math.sqrt(k / m) / (2 * Math.PI);
+				}
+				
+				// Update state display
+				function updateStateDisplay() {
+					const energy = calculateEnergy();
+					const frequency = calculateFrequency();
+					
+					document.getElementById('positionValue').textContent = position.toFixed(2);
+					document.getElementById('velocityValue').textContent = velocity.toFixed(2);
+					document.getElementById('energyValue').textContent = energy.toFixed(2);
+					document.getElementById('frequencyValue').textContent = frequency.toFixed(2);
+				}
+				
+				// Spring physics equations
+				function updatePhysics(deltaTime) {
+					if (!isDragging && !isPaused) {
+						// Spring force: F = -k(x - x0)
+						const displacement = position - equilibriumX;
+						const springForce = -k * displacement;
+						
+						// Damping force: F = -c * v
+						const dampingForce = -c * velocity;
+						
+						// Total force
+						const totalForce = springForce + dampingForce;
+						
+						// Newton's second law: F = ma
+						const acceleration = totalForce / m;
+						
+						// Update velocity and position
+						velocity += acceleration * deltaTime;
+						position += velocity * deltaTime;
+						
+						// Constrain position to canvas bounds
+						const minPosition = springAnchorX + massSize;
+						const maxPosition = canvasWidth - massSize;
+						if (position < minPosition) {
+							position = minPosition;
+							velocity = -velocity * 0.5; // Bounce with energy loss
+						} else if (position > maxPosition) {
+							position = maxPosition;
+							velocity = -velocity * 0.5; // Bounce with energy loss
+						}
+					}
+				}
+				
+				// Render function
+				function render() {
+					// Clear canvas
+					ctx.fillStyle = '#f8f9fa';
+					ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+					
+					// Draw position vs time plot as background
+					drawPlotBackground();
+					
+					// Draw equilibrium line
+					ctx.strokeStyle = '#95a5a6';
+					ctx.lineWidth = 2;
+					ctx.setLineDash([5, 5]);
+					ctx.beginPath();
+					ctx.moveTo(equilibriumX, 50);
+					ctx.lineTo(equilibriumX, canvasHeight - 50);
+					ctx.stroke();
+					ctx.setLineDash([]);
+					
+					// Draw spring
+					ctx.strokeStyle = '#e74c3c';
+					ctx.lineWidth = 4;
+					ctx.beginPath();
+					ctx.moveTo(springAnchorX, canvasHeight / 2);
+					ctx.lineTo(position, canvasHeight / 2);
+					ctx.stroke();
+					
+					// Draw spring coils
+					const springLength = position - springAnchorX;
+					const numCoils = Math.max(3, Math.floor(springLength / 20));
+					const coilSpacing = springLength / numCoils;
+					
+					ctx.strokeStyle = '#c0392b';
+					ctx.lineWidth = 2;
+					ctx.beginPath();
+					for (let i = 0; i <= numCoils; i++) {
+						const x = springAnchorX + i * coilSpacing;
+						const y = canvasHeight / 2 + (i % 2 === 0 ? 10 : -10);
+						if (i === 0) {
+							ctx.moveTo(x, y);
+						} else {
+							ctx.lineTo(x, y);
+						}
+					}
+					ctx.stroke();
+					
+					// Draw mass
+					ctx.fillStyle = (isDragging) ? '#e74c3c' : (isPaused ? '#95a5a6' : '#3498db');
+					ctx.beginPath();
+					ctx.arc(position, canvasHeight / 2, massSize, 0, 2 * Math.PI);
+					ctx.fill();
+					ctx.strokeStyle = '#2980b9';
+					ctx.lineWidth = 3;
+					ctx.stroke();
+					
+					// Draw position indicator
+					ctx.fillStyle = '#2c3e50';
+					ctx.font = '16px Arial';
+					ctx.textAlign = 'center';
+					ctx.fillText(`x = ${Math.round(position)}`, position, canvasHeight / 2 - massSize - 10);
+					
+					// Draw pause indicator
+					if (isPaused) {
+						ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+						ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+						ctx.fillStyle = 'white';
+						ctx.font = '48px Arial';
+						ctx.textAlign = 'center';
+						ctx.fillText('PAUSED', canvasWidth / 2, canvasHeight / 2);
+					}
+				}
+				
+				// Slider event listeners
+				springConstantSlider.addEventListener('input', function() {
+					const percent = parseInt(this.value);
+					k = percentToValue(percent, PARAM_RANGES.springConstant);
+					updateDisplayValues();
+				});
+				
+				massSlider.addEventListener('input', function() {
+					const percent = parseInt(this.value);
+					m = percentToValue(percent, PARAM_RANGES.mass);
+					updateDisplayValues();
+				});
+				
+				dampingSlider.addEventListener('input', function() {
+					const percent = parseInt(this.value);
+					c = percentToValue(percent, PARAM_RANGES.damping);
+					updateDisplayValues();
+				});
+				
+				initialPositionSlider.addEventListener('input', function() {
+					const percent = parseInt(this.value);
+					initialPosition = percentToValue(percent, PARAM_RANGES.initialPosition);
+					updateDisplayValues();
+				});
+				
+				initialVelocitySlider.addEventListener('input', function() {
+					const percent = parseInt(this.value);
+					initialVelocity = percentToValue(percent, PARAM_RANGES.initialVelocity);
+					updateDisplayValues();
+				});
+				
+				equilibriumPositionSlider.addEventListener('input', function() {
+					const percent = parseInt(this.value);
+					equilibriumX = percentToValue(percent, PARAM_RANGES.equilibriumPosition);
+					updateDisplayValues();
+				});
+				
+				// Button event listeners
+				resetBtn.addEventListener('click', function() {
+					position = initialPosition;
+					velocity = initialVelocity;
+					isDragging = false;
+					
+					// Clear plot data and reset time
+					dataPoints.length = 0;
+					simulationTime = 0;
+				});
+				
+				pauseBtn.addEventListener('click', function() {
+					isPaused = !isPaused;
+					this.textContent = isPaused ? 'Resume' : 'Pause';
+					this.style.background = isPaused ? '#27ae60' : '#e74c3c';
+				});
+				
+				// Mouse handling
+				canvas.addEventListener('mousedown', function(e) {
+					const rect = canvas.getBoundingClientRect();
+					const mouseX = e.clientX - rect.left;
+					const mouseY = e.clientY - rect.top;
+					
+					// Check if click is near mass
+					const distance = Math.sqrt((mouseX - position) ** 2 + (mouseY - canvasHeight / 2) ** 2);
+					
+					if (distance < massSize + 10) {
+						isDragging = true;
+						dragStartX = mouseX;
+						dragStartY = mouseY;
+						dragStartTime = performance.now();
+						lastDragX = mouseX;
+						lastDragTime = dragStartTime;
+						velocity = 0;
+					}
+				});
+				
+				canvas.addEventListener('mousemove', function(e) {
+					if (isDragging) {
+						const rect = canvas.getBoundingClientRect();
+						const mouseX = e.clientX - rect.left;
+						const currentTime = performance.now();
+						
+						// Update position
+						position = clamp(mouseX, springAnchorX + massSize, canvasWidth - massSize);
+						
+						// Calculate drag velocity
+						const timeDelta = (currentTime - lastDragTime) / 1000;
+						if (timeDelta > 0) {
+							currentDragVelocity = (mouseX - lastDragX) / timeDelta;
+						}
+						
+						lastDragX = mouseX;
+						lastDragTime = currentTime;
+						
+						updateDisplayValues();
+					}
+				});
+				
+				canvas.addEventListener('mouseup', function(e) {
+					if (isDragging) {
+						const dragVelocity = currentDragVelocity * VELOCITY_SCALE;
+						const clampedVelocity = clamp(dragVelocity, -100, 100);
+						velocity = clampedVelocity;
+						initialVelocity = clampedVelocity;
+						
+						const velocityPercent = valueToPercent(clampedVelocity, PARAM_RANGES.initialVelocity);
+						initialVelocitySlider.value = Math.round(velocityPercent);
+						
+						updateDisplayValues();
+					}
+					isDragging = false;
+				});
+				
+				// Animation loop
+				function animate(currentTime) {
+					const deltaTime = (currentTime - lastTime) / 16.67; // Normalize to 60 FPS
+					lastTime = currentTime;
+					
+					// Update simulation time (convert to seconds)
+					simulationTime += deltaTime / 60;
+					
+					updatePhysics(deltaTime);
+					render();
+					
+					// Add data point to plot (always record, even when dragging)
+					addDataPoint(simulationTime, position);
+					
+					updateDisplayValues();
+					updateStateDisplay();
+					requestAnimationFrame(animate);
+				}
+				
+				// Initialize display
+				updateDisplayValues();
+				
+				// Start animation
+				animate(0);
+
+				// Add data point to plot
+				function addDataPoint(time, pos) {
+					dataPoints.push({ time: time, position: pos });
+					
+					// Remove old data points beyond maxTime
+					while (dataPoints.length > 0 && dataPoints[0].time < time - maxTime) {
+						dataPoints.shift();
+					}
+				}
+				
+				// Draw the position vs time plot as background
+				function drawPlotBackground() {
+					if (dataPoints.length < 2) return;
+					
+					// Calculate plot bounds
+					const minTime = Math.max(0, simulationTime - maxTime);
+					const maxTimePlot = simulationTime;
+					const minPos = Math.min(...dataPoints.map(p => p.position));
+					const maxPos = Math.max(...dataPoints.map(p => p.position));
+					const posRange = maxPos - minPos;
+					const posMargin = posRange * 0.1;
+					
+					// Use the full canvas for plotting
+					const plotWidth = canvasWidth;
+					const plotHeight = canvasHeight;
+					
+					// Draw grid with transparency
+					ctx.strokeStyle = 'rgba(200, 200, 200, 0.3)';
+					ctx.lineWidth = 1;
+					
+					// Vertical grid lines (time)
+					for (let t = Math.ceil(minTime); t <= maxTimePlot; t++) {
+						const x = ((t - minTime) / maxTime) * plotWidth;
+						ctx.beginPath();
+						ctx.moveTo(x, 0);
+						ctx.lineTo(x, plotHeight);
+						ctx.stroke();
+					}
+					
+					// Horizontal grid lines (position)
+					const numGridLines = 5;
+					for (let i = 0; i <= numGridLines; i++) {
+						const pos = minPos - posMargin + (i / numGridLines) * (posRange + 2 * posMargin);
+						const y = plotHeight - ((pos - (minPos - posMargin)) / (posRange + 2 * posMargin)) * plotHeight;
+						ctx.beginPath();
+						ctx.moveTo(0, y);
+						ctx.lineTo(plotWidth, y);
+						ctx.stroke();
+					}
+					
+					// Draw equilibrium line with transparency
+					ctx.strokeStyle = 'rgba(231, 76, 60, 0.4)';
+					ctx.lineWidth = 2;
+					ctx.setLineDash([5, 5]);
+					const eqY = plotHeight - ((equilibriumX - (minPos - posMargin)) / (posRange + 2 * posMargin)) * plotHeight;
+					ctx.beginPath();
+					ctx.moveTo(0, eqY);
+					ctx.lineTo(plotWidth, eqY);
+					ctx.stroke();
+					ctx.setLineDash([]);
+					
+					// Draw position curve with transparency
+					ctx.strokeStyle = 'rgba(52, 152, 219, 0.6)';
+					ctx.lineWidth = 2;
+					ctx.beginPath();
+					
+					for (let i = 0; i < dataPoints.length; i++) {
+						const point = dataPoints[i];
+						const x = ((point.time - minTime) / maxTime) * plotWidth;
+						const y = plotHeight - ((point.position - (minPos - posMargin)) / (posRange + 2 * posMargin)) * plotHeight;
+						
+						if (i === 0) {
+							ctx.moveTo(x, y);
+						} else {
+							ctx.lineTo(x, y);
+						}
+					}
+					ctx.stroke();
+					
+					// Draw axes labels with transparency
+					ctx.fillStyle = 'rgba(44, 62, 80, 0.7)';
+					ctx.font = '10px Arial';
+					ctx.textAlign = 'center';
+					
+					// X-axis labels (time)
+					for (let t = Math.ceil(minTime); t <= maxTimePlot; t++) {
+						const x = ((t - minTime) / maxTime) * plotWidth;
+						ctx.fillText(t + 's', x, plotHeight - 5);
+					}
+					
+					// Y-axis labels (position)
+					for (let i = 0; i <= numGridLines; i++) {
+						const pos = minPos - posMargin + (i / numGridLines) * (posRange + 2 * posMargin);
+						const y = plotHeight - ((pos - (minPos - posMargin)) / (posRange + 2 * posMargin)) * plotHeight;
+						ctx.textAlign = 'right';
+						ctx.fillText(Math.round(pos) + 'px', plotWidth - 5, y + 3);
+					}
+					
+					// Reset text alignment
+					ctx.textAlign = 'left';
+				}
+			});
+		</script>
+	</body>
+</html> 
